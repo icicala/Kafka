@@ -1,23 +1,35 @@
-from kafka import KafkaProducer
-from kafka import KafkaConsumer
+"""
+Produce and Consumer for Kafka Broker
+"""
 from json import dumps
 from json import loads
+from csv import reader
+from kafka import KafkaProducer
+from kafka import KafkaConsumer
 
 
 def producer():
+    """
+    Producer for Kafka Broker
+    """
     kafka_producer = KafkaProducer(
         bootstrap_servers=['localhost:9092'],
         value_serializer=lambda x: dumps(x).encode('utf-8')
     )
-
-    for i in range(10):
-        data = {'counter': i}
-        kafka_producer.send('topic_test', value=data)
+    with open('C:/Users/IonCicala/bikecsv/DimCurrency.csv', mode='rt', encoding='utf-8') \
+            as csv_data:
+        file_read = reader(csv_data, delimiter='|')
+        for row in file_read:
+            kafka_producer.send('DimCurrency', value=row)
 
 
 def consumer():
+    """
+    Consumer from Kafka Broker
+    :return: None
+    """
     kafka_consumer = KafkaConsumer(
-        'topic_test',
+        'DimCurrency',
         bootstrap_servers=['localhost:9092'],
         auto_offset_reset='earliest',
         enable_auto_commit=True,
